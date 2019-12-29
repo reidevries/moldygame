@@ -1,8 +1,0 @@
-#ifndef CPPHEADER_H
-#define CPPHEADER_H
-
-class CPPHEADER {
-	
-};
-
-#endif
