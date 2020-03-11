@@ -1,6 +1,0 @@
-CC = g++
-CFLAGS = -lraylib -lglfw -lGL -lopenal -lm -pthread -ldl
-ALLFILES = main.cpp gameworld.cpp texturesprite.cpp gameobject.cpp vectormath.cpp blobobject.cpp vectorfan.cpp debugprinter.cpp
-
-all: $(ALLFILES)
-	$(CC) $(ALLFILES) $(CFLAGS) -o game
