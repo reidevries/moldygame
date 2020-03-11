@@ -4,30 +4,31 @@
 #include <raylib.h>
 #include <string>
 #include "vectormath.h"
+#include <memory>
+#include <vector>
 
 class TextureSprite {
 	private:
 		std::string name;
-		Texture2D* texture;
-		int numtex;				//the number of textures in the texture array
-		int texindex;			//the index of the texture that is currently being drawn
+		std::vector<std::shared_ptr<Texture2D>> textures;
+		int draw_index;					//the index of the texture that is currently being drawn
 		Vector2 pos;
 		float scale = 1;
 		float rotation = 0;
 		
-		float screenscale = 1;
-		Vector2 pixpos;
-		float pixscale = 1;
-		
-	public:
-		TextureSprite(std::string name, Texture2D* texture, int numtex, Vector2 pos, float screenscale);
+		float screen_scale = 1;
+		Vector2 pos_pixels;
+		float scale_pixels = 1;
 		
 		Texture2D getCurrentTexture();
-		Texture2D* getAllTextures() {return texture;}
+	public:
+		TextureSprite(std::string name, std::vector<std::shared_ptr<Texture2D>> textures, Vector2 pos, float screen_scale);
+
+		std::vector<std::shared_ptr<Texture2D>> getAllTextures() {return textures;}
 		std::string getName() {return name;}
 		
-		void setTexIndex(int texindex);
-		int getTexIndex() {return texindex;}
+		void setDrawingIndex(int draw_index);
+		int getDrawingIndex() {return draw_index;}
 		void setPos(Vector2 pos);
 		Vector2 getPos() {return pos;}
 		void setScale(float scale);
@@ -38,10 +39,8 @@ class TextureSprite {
 		void setScreenScale(float screenscale);
 		
 		void draw(Color color);
-		void draw(Vector2 position);
+		void draw(Vector2 pos);
 		void draw();
-		
-		~TextureSprite();
 };
 
 #endif

@@ -1,43 +1,54 @@
 #include "gameworld.h"
 #include "blobobject.h"
+#include <sstream>
+#include <iostream>
 
-GameWorld::GameWorld(int screenwidth, int screenheight) {
-	this->screenwidth = screenwidth;
-	this->screenheight = screenheight;
-	screenscale = screenheight/WORLDHEIGHT;
-	worldwidth = WORLDHEIGHT*(screenwidth/screenheight);
+GameWorld::GameWorld(int screen_w, int screen_h, bool debug) {
+	this->debug = debug;
+	this->screen_w = screen_w;
+	this->screen_h = screen_h;
+	screen_scale = screen_h/WORLD_H;
+	world_w = WORLD_H*(screen_w/screen_h);
 
-
-	font = LoadFontEx("font/Andika/Andika-R.ttf", int(6*screenscale), 0, 0);
+	level_loader = LevelLoader(0);
+	font = LoadFontEx("font/Andika/Andika-R.ttf", int(6*screen_scale), 0, 0);
 	
-	Image parrots = LoadImage("texture/fairy/wink.png");
-	texturebuffer.emplace_back(LoadTextureFromImage(parrots));
-	UnloadImage(parrots);   // Once image has been converted to texture and uploaded to VRAM, it can be unloaded from RAM
-	
-	VectorFan* v = new VectorFan((Vector2){20,20}, 7, 5);
-	BlobObject* b = new BlobObject(*v, 1, screenscale);
-	gameobjectbuffer.push_back(b);
+	Polygon v((Vector2){20,20}, 7, 5);
+	object_buf.emplace_back(new BlobObject(v, 1, screen_scale));
+	if (debug) std::cout << "i am happy" << std::endl;
 }
 
-void GameWorld::render() {
-	BeginDrawing();
+void GameWorld::update(float dt) {
+	for (auto&& object : object_buf) {
+		object->update(level_loader.getCurrentLevel(), dt);
+	}
+}
 
+void GameWorld::render(float dt) {
+	BeginDrawing();
+	
 	ClearBackground(RAYWHITE);
-	for (std::vector<GameObject*>::iterator it = gameobjectbuffer.begin(); it != gameobjectbuffer.end(); it++) {
-		(*it)->draw();
+	for (auto&& object : object_buf) {
+		object->draw();
 	}
 	
-	for (std::vector<TextureSprite>::iterator it = uitexturebuffer.begin(); it != uitexturebuffer.end(); it++) {
-		it->draw((Vector2){ (float)(worldwidth/2 - 20), (float)(WORLDHEIGHT/2 - 20)});
+	for (auto ui : ui_buf) {
+		ui.draw((Vector2){ static_cast<float>(world_w/2 - 20), static_cast<float>(WORLD_H/2 - 20)});
 	}
 
-	// Draw text directly using sprite font
-	DrawTextEx(font, "hellooo popyp", (Vector2){ 2, 30}, (float)font.baseSize, 0.0f, BLACK);
+	if (debug) {
+		level_loader.getCurrentLevel()->debugRenderFood(screen_scale);
+		
+		std::stringstream debugtxt;
+		debugtxt << "Debug text " << dt;
+		// Draw text directly using sprite font
+		DrawTextEx(font, debugtxt.str().c_str(), (Vector2){ 2, 30}, static_cast<float>(font.baseSize), 0.0f, BLACK);
+	}
 
 	EndDrawing();
 }
 
 GameWorld::~GameWorld() {
-	gameobjectbuffer.clear();
+	object_buf.clear();
 	UnloadFont(font);           // Unload custom spritefont
 }

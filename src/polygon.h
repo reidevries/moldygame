@@ -5,27 +5,39 @@
 #include <vector>
 #include <string>
 
-class VectorFan {
+class Polygon {
 	private:
-		std::vector<Vector2> fanpoints;
-		Vector2 centrepos;
+		std::vector<Vector2> vertices;
+		Vector2 centre_pos;										//RECALCULATE ON CHANGES TO VECTORFAN stores the centre position (centre = average of all points)
+		Vector2 bounds_min, bounds_max;							//RECALCULATE ON CHANGES TO VECTORFAN stores the bounding box of the vectorfan
+		void recalculateData();									//recalculates the above two variables from scratch, which is the least efficient way to do it
+		void updateBound(Vector2 newpos);
+		void recalculateBound();
+		void recalculateBound(Vector2 removed_point);
+		int getNearestIndex(Vector2 position);					//gets the index of the point closest to the given position
 	public:
-		VectorFan();
-		VectorFan(Vector2* points, int pointnum);
-		VectorFan(Vector2 centre, float radius, int pointnum);	//this creates a circle with a resolution of pointnum
+		Polygon();
+		Polygon(std::vector<Vector2> points, int pointnum);
+		Polygon(Vector2 centre, float radius, int pointnum);	//this creates a circle with a resolution of pointnum
 		
-		Vector2* getArray() {return fanpoints.data();}
-		int getPointNum() {return fanpoints.size();}
-		Vector2 getCentre() {return centrepos;}					//gets the "centre"
-		int getIndexOfPoint(Vector2 position);					//gets the index of the point closest to the given position
-		
+		std::vector<Vector2> getVertices() {return vertices;}
+		int getPointNum() {return vertices.size();}
+		Vector2 getCentre() {return centre_pos;}					//gets the "centre"
 		Vector2 getPointPos(int index);							//gets the position of the point at index
 		void movePoint(int index, Vector2 newpos);				//moves a point to newpos, and updates the centrepos
 		void addPoint(int index, Vector2 newpoint);				//adds a point, and updates the centrepos
 		void removePoint(int index);							//removes a poin, and updates the centrepos
+		void reverse();											//reverses the entire fan
+		void clear();											//removes all points
 		
-		float findOverlapAmount(VectorFan b) {return 1;}				//figures out if this VectorFan overlaps with the given VectorFan
-		std::vector<Vector2> findOverlapShape(VectorFan b) {return fanpoints;}//finds the shape of the overlap between this vectorfan and the given one
+		int getNearestClockwiseIndex(Vector2 position);
+		
+		bool containsPoint(Vector2 point);
+		float findVertexCoverage(Polygon b);					//finds the percentage of b's vertices that are inside this vectorfan
+		std::vector<Vector2> findOverlapShape(Polygon b); 	//finds the shape of the overlap between this vectorfan and the given one
+
+		Vector2* getArrayScaled(float screen_scale);
+		std::string printArray();
 };
 
 #endif

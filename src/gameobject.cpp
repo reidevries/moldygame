@@ -1,41 +1,33 @@
 #include "gameobject.h"
 
-GameObject::GameObject(TextureSprite* spritearray, int spritenum, Vector2 position, float screenscale) {
-	this->spritearray = spritearray;
-	this->spritenum = spritenum;
-	this->position = position;
+GameObject::GameObject(std::vector<TextureSprite> sprites, int sprite_num, Vector2 pos, float screen_scale) {
+	this->sprites = sprites;
+	this->sprite_num = sprite_num;
+	this->pos = pos;
 	
-	setScreenScale(screenscale);
+	setScreenScale(screen_scale);
 }
 
-Texture2D** GameObject::getAllTextures() {
-	Texture2D** alltextures = new Texture2D*[spritenum];
-	for (int i = 0; i < spritenum; i++) {
-		alltextures[i] = spritearray[i].getAllTextures();
-	}
-	return alltextures;
+GameObject::GameObject(Vector2 pos, float screen_scale) {
+	this->sprites = std::vector<TextureSprite>();
+	this->sprite_num = 0;
+	this->pos = pos;
+
+	setScreenScale(screen_scale);
 }
 
-std::string* GameObject::getAllNames() {
-	std::string* allnames = new std::string[spritenum];
-	for (int i = 0; i < spritenum; i++) {
-		allnames[i] = spritearray[i].getName();
-	}
-	return allnames;
+void GameObject::replaceSprites(std::vector<TextureSprite> sprites, int sprite_num) {
+	this->sprites = sprites;
+	this->sprite_num = sprite_num;
 }
 
-void GameObject::replaceSpriteArray(TextureSprite* spritearray, int spritenum) {
-	this->spritearray = spritearray;
-	this->spritenum = spritenum;
-}
-
-void GameObject::setScreenScale(float screenscale) {
-	this->screenscale = screenscale;
-	for (int i = 0; i < spritenum; i++) {
-		spritearray[i].setScreenScale(screenscale);
+void GameObject::setScreenScale(float screen_scale) {
+	this->screen_scale = screen_scale;
+	for (auto sprite : sprites) {
+		sprite.setScreenScale(screen_scale);
 	}
 }
 
-void GameObject::update(float dt) {
-	
+std::unique_ptr<Level>  GameObject::update(std::unique_ptr<Level> level, float dt) {
+	return level;
 }

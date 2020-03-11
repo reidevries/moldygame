@@ -4,34 +4,34 @@
 #include <raylib.h>
 #include <vector>
 #include "texturesprite.h"
+#include "level.h"
+#include <memory>
 
 class GameObject {
 	protected:
-		TextureSprite* spritearray;
-		int spritenum;
-		Vector2 position;
-		int zpos;
+		std::vector<TextureSprite> sprites;
+		int sprite_num;
+		Vector2 pos;
+		int z_pos;
 		
-		float screenscale;
+		float screen_scale;
 		
 	public:
-		GameObject(TextureSprite* spritearray, int spritenum, Vector2 position, float screenscale);
-
-		TextureSprite* getSpriteArray() {return spritearray;}
-		Texture2D** getAllTextures();
-		std::string* getAllNames();
-		int getSpriteNum() {return spritenum;}
-		Vector2 getPosition() {return position;}
-		int getZPos() {return zpos;}
+		GameObject(std::vector<TextureSprite> sprites, int sprite_num, Vector2 pos, float screen_scale);
+		GameObject(Vector2 pos, float screen_scale);
+		int getSpriteNum() {return sprite_num;}
+		Vector2 getPosition() {return pos;}
+		int getZPos() {return z_pos;}
 		
-		void replaceSpriteArray(TextureSprite* spritearray, int spritenum);
-		void setPosition(Vector2 position) {this->position = position;}
-		void setZPos(int zpos) {this->zpos = zpos;}
+		void replaceSprites(std::vector<TextureSprite> sprites, int sprite_num);
+		void setPos(Vector2 pos) {this->pos = pos;}
+		void setZPos(int zpos) {this->z_pos = zpos;}
 		
-		void setScreenScale(float screenscale);
+		void setScreenScale(float screen_scale);
 		
-		virtual void update(float dt);
+		virtual std::unique_ptr<Level> update(std::unique_ptr<Level> level, float dt);
 		virtual void draw() =0;
+		virtual ~GameObject() {sprites.clear();}
 };
 
 #endif

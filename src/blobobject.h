@@ -4,23 +4,27 @@
 #include <raylib.h>
 #include <vector>
 #include <string>
-#include "vectorfan.h"
 #include "gameobject.h"
+#include "polygon.h"
 #include "texturesprite.h"
+#include <memory>
 
 class BlobObject: public GameObject {
 	private:
-		VectorFan vectorfan;	//array of 2D points representing the outside of the blob
+		Polygon polygon;		//array of 2D points representing the outside of the blob
 		Color colour;			//colour of the triangle fan
 		int speed;				//speed of movement
-		
+		int next_i;				//used for updating each vertex over multiple update frames	
+		std::unique_ptr<MoldFood> homefood = nullptr;		//address of the vectorfan that this mold is home to
 	public:
-		BlobObject(VectorFan vectorfan, TextureSprite* spritearray, int spritenum, Vector2 position, float speed, float screenscale);
-		BlobObject(VectorFan vectorfan, int speed, float screenscale);
+		BlobObject(Polygon polygon, std::vector<TextureSprite> sprite_arr, int sprite_num, Vector2 pos, float speed, float screen_scale);
+		BlobObject(Polygon polygon, int speed, float screen_scale);
 		
-		void setScreenScale(float screenscale);
+		void setScreenScale(float screen_scale);
 
-		void update(VectorFan** fillable, float dt);
+		std::unique_ptr<Level> findHome(std::unique_ptr<Level> level);
+		
+		std::unique_ptr<Level> update(std::unique_ptr<Level>, float dt);
 		void draw();
 };
 

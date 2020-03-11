@@ -1,56 +1,48 @@
 #include "texturesprite.h"
 #include <iostream>
 
-TextureSprite::TextureSprite(std::string name, Texture2D* texture, int numtex, Vector2 pos, float screenscale) {
+TextureSprite::TextureSprite(std::string name, std::vector<std::shared_ptr<Texture2D>> textures, Vector2 pos, float screenscale) {
 	this->name = name;
-	this->texture = texture;
-	this->numtex = numtex;
+	this->textures = textures;
 	this->pos = pos;
-	texindex = 0;
+	draw_index = 0;
 	
 	setScreenScale(screenscale);
 }
 
-void TextureSprite::setTexIndex(int texindex) {
-	if (texindex < numtex && texindex >= 0) this->texindex = texindex;
+void TextureSprite::setDrawingIndex(int texindex) {
+	if (texindex < textures.size() && texindex >= 0) this->draw_index = texindex;
 	else std::cerr << "Tried to set TextureSprite '" << name << "' to invalid texindex " << texindex << std::endl;
-}
-
-Texture2D TextureSprite::getCurrentTexture() {
-	return texture[texindex];
 }
 
 void TextureSprite::setPos(Vector2 pos) {
 	this->pos = pos;
-	pixpos = VectorMath::scale(pos, screenscale);
+	pos_pixels = VectorMath::scale(pos, screen_scale);
 }
 
 void TextureSprite::setScale(float scale) {
 	this->scale = scale;
-	this->pixscale = scale*screenscale;
+	this->scale_pixels = scale*screen_scale;
 }
 
 void TextureSprite::setScreenScale(float screenscale) {
-	this->screenscale = screenscale;
-	pixpos = VectorMath::scale(pos, screenscale);
-	pixscale = scale*screenscale;
+	this->screen_scale = screenscale;
+	pos_pixels = VectorMath::scale(pos, screenscale);
+	scale_pixels = scale*screenscale;
+}
+
+Texture2D TextureSprite::getCurrentTexture() {
+	return *textures[draw_index];
 }
 
 void TextureSprite::draw(Color color) {
-	DrawTextureEx(getCurrentTexture(), pixpos, rotation, pixscale, color);
+	DrawTextureEx(getCurrentTexture(), pos_pixels, rotation, scale_pixels, color);
 }
 
-void TextureSprite::draw(Vector2 position) {
-	DrawTextureEx(getCurrentTexture(), VectorMath::add(pixpos, VectorMath::scale(position, screenscale)), 0, pixscale, WHITE);
+void TextureSprite::draw(Vector2 pos) {
+	DrawTextureEx(getCurrentTexture(), VectorMath::add(pos_pixels, VectorMath::scale(pos, screen_scale)), 0, scale_pixels, WHITE);
 }
 
 void TextureSprite::draw() {
 	draw(WHITE);
-}
-
-TextureSprite::~TextureSprite() {
-	//maybe should do this externally so that the memory can be freed at the same time
-	for (int i = 0; i < numtex; i++) {
-		UnloadTexture(texture[i]);
-	}
 }
