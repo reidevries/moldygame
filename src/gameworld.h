@@ -8,6 +8,10 @@
 #include "blobobject.h"
 #include "levelloader.h"
 #include "polygon.h"
+#include "resman.h"
+#include "debugprinter.h"
+#include <random>
+#include "texres.h"
 
 class GameWorld {
 	private:
@@ -16,16 +20,20 @@ class GameWorld {
 		float screen_scale;
 		float world_w;
 		bool debug;
-		
+
 		LevelLoader level_loader;
 		std::vector<std::unique_ptr<GameObject>> object_buf;
-		std::vector<Texture2D> tex_buf;
-		std::vector<TextureSprite> ui_buf;
+		std::vector<std::unique_ptr<TexSprite>> ui_buf;
 		Font font;
+
+		std::mt19937 mersenne_twister;
+		std::uniform_real_distribution<double> distribute;
 	public:
 		GameWorld(int screen_w, int screen_h, bool debug);
-		void update(float dt);
+		void ageTextures(float dt);
+		std::unique_ptr<ResMan> update(float dt, unsigned int time_s, std::unique_ptr<ResMan> resman);
 		void render(float dt);
+		void renderDebug(float dt);
 		~GameWorld();
 };
 

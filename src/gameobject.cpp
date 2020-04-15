@@ -1,6 +1,6 @@
 #include "gameobject.h"
 
-GameObject::GameObject(std::vector<TextureSprite> sprites, int sprite_num, Vector2 pos, float screen_scale) {
+GameObject::GameObject(std::vector<TexSprite> sprites, int sprite_num, Vector2 pos, float screen_scale) {
 	this->sprites = sprites;
 	this->sprite_num = sprite_num;
 	this->pos = pos;
@@ -9,14 +9,14 @@ GameObject::GameObject(std::vector<TextureSprite> sprites, int sprite_num, Vecto
 }
 
 GameObject::GameObject(Vector2 pos, float screen_scale) {
-	this->sprites = std::vector<TextureSprite>();
+	this->sprites = std::vector<TexSprite>();
 	this->sprite_num = 0;
 	this->pos = pos;
 
 	setScreenScale(screen_scale);
 }
 
-void GameObject::replaceSprites(std::vector<TextureSprite> sprites, int sprite_num) {
+void GameObject::replaceSprites(std::vector<TexSprite> sprites, int sprite_num) {
 	this->sprites = sprites;
 	this->sprite_num = sprite_num;
 }

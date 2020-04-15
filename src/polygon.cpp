@@ -24,7 +24,7 @@ void Polygon::updateBound(Vector2 new_point) {
 
 void Polygon::recalculateBound() {
 	bounds_max = (Vector2){0,0};
-	bounds_min = (Vector2){0,0};
+	bounds_min = (Vector2){999999999.0,999999999.0};
 	for (auto vertex : vertices) {
 		updateBound(vertex);
 	}
@@ -53,29 +53,29 @@ void Polygon::recalculateData() {
 Polygon::Polygon() {
 }
 
-Polygon::Polygon(std::vector<Vector2> vertices, int pointnum) {
+Polygon::Polygon(std::vector<Vector2> vertices, int point_num) {
 	this->vertices = vertices;
 	recalculateData();
 }
 
-Polygon::Polygon(Vector2 centre, float radius, int pointnum) {
+Polygon::Polygon(Vector2 centre, float radius, int point_num) {
 	centre_pos = centre;
 	
 	bounds_max = (Vector2){0,0};
 	bounds_min = (Vector2){0,0};
-	for (int i = 0; i < pointnum; i++) {
-		double radians = 2*M_PI*i/pointnum;
+	for (int i = 0; i < point_num; i++) {
+		double radians = 2*M_PI*i/point_num;
 		Vector2 edge = (Vector2){ float(centre.x + radius*cos(radians)), float(centre.y - radius*sin(radians)) };
 		vertices.push_back(edge);
 		updateBound(edge);
 	}
 }
 
-int Polygon::getNearestIndex(Vector2 position) {
+int Polygon::getNearestIndex(Vector2 pos) {
 	float mindist = -1;
 	int savedmin = 0;
 	for (auto it = vertices.begin(); it != vertices.end(); ++it) {
-		float sqrdist = VectorMath::sqrdist(position, *it);
+		float sqrdist = VectorMath::sqrdist(pos, *it);
 		if (mindist == -1 || sqrdist < mindist) {
 			mindist = sqrdist;
 			savedmin = it-vertices.begin();
@@ -84,14 +84,14 @@ int Polygon::getNearestIndex(Vector2 position) {
 	return savedmin;
 }
 
-int Polygon::getNearestClockwiseIndex(Vector2 position) {
-	int nearestindex = getNearestIndex(position);
+int Polygon::getNearestClockwiseIndex(Vector2 pos) {
+	int nearestindex = getNearestIndex(pos);
 	if (nearestindex >= getPointNum()) {
 		return nearestindex;
 	}
 	Vector2 nearest = vertices[nearestindex];
 	Vector2 nearestd = VectorMath::sub(nearest, centre_pos);
-	Vector2 thisd = VectorMath::sub(position, centre_pos);
+	Vector2 thisd = VectorMath::sub(pos, centre_pos);
 	
 	bool is_clockwise = false;
 	if ((nearestd.x > 0  && thisd.x > 0) 
@@ -111,8 +111,32 @@ int Polygon::getNearestClockwiseIndex(Vector2 position) {
 	else return nextindex;
 }
 
+std::array<Vector2, 2> Polygon::getNearestEdge(Vector2 pos) {
+	std::vector<Vector2>::iterator next_it;
+	float nearest_dist = 100000;
+	std::array<Vector2, 2> nearest_edge = {(Vector2){-1,-1}, (Vector2){-1,-1}};
+	for (auto it = vertices.begin(); it != vertices.end(); it++) {
+		next_it = std::next(it);
+		if (next_it == vertices.end()) {
+			next_it = vertices.begin();
+		}
+
+		float dist = VectorMath::distanceToSegment(*it, *next_it, pos);
+		if (dist < nearest_dist) {
+			nearest_dist = dist;
+			nearest_edge = {*it, *next_it};
+		}
+	}
+	return nearest_edge;
+}
+
 Vector2 Polygon::getPointPos(int index) {
-	return vertices[index];
+	if (index < vertices.size() && index >= 0) {
+		return vertices[index];
+	} else {
+		std::cout << "hey! ur trying to access vertex " << index << ", which doesn't exist in Polygon " << this << "!" << std::endl;
+		return vertices[0];
+	}
 }
 
 void Polygon::movePoint(int index, Vector2 newpos) {
@@ -175,37 +199,19 @@ bool Polygon::containsPoint(Vector2 point) {
 
 float Polygon::findVertexCoverage(Polygon b) {
 	std::vector<Vector2> bv = b.getVertices();
-	int bn = b.getPointNum();
+	int bn = b.getPointNum()+getPointNum();
 	float accumulator = 0;
 	for (auto b_vertex : bv) {
 		if (containsPoint(b_vertex)) accumulator++;
+	}
+	for (auto this_vertex : vertices) {
+		if (b.containsPoint(this_vertex)) accumulator++;
 	}
 	return accumulator/bn;
 }
 
 std::vector<Vector2> Polygon::findOverlapShape(Polygon b) {
 	std::vector<Vector2> b_vertices = b.getVertices();
-	std::vector<Vector2>::iterator next_it, next_jt;
-	for (auto it = vertices.begin(); it != vertices.end(); it++) {
-		next_it = std::next(it);
-		if (next_it == vertices.end()) {
-			next_it = vertices.begin();
-		}
-		
-		for (auto jt = b_vertices.begin(); jt != b_vertices.end(); jt++) {
-			next_jt = std::next(jt);
-			if (next_jt == b_vertices.end()) {
-				next_jt = b_vertices.begin();
-			}
-			
-			Vector2 intersection = VectorMath::intersectLines(*it, *next_it, *jt, *next_jt);
-			if (intersection.x >= 0 || intersection.y >= 0) {
-				//add the intersectino point to the vectorfan of the overlap shape?
-			} else {
-				//do something else?
-			}
-		}
-	}
 	return b_vertices;
 }
 
@@ -220,10 +226,10 @@ Vector2* Polygon::getArrayScaled(float screen_scale) {
 }
 
 std::string Polygon::printArray() {
-		std::stringstream ss;
-		for (std::vector<Vector2>::iterator it = vertices.begin(); it != vertices.end(); it++) {
-			ss << it->x << "," << it->y << " ";
-		}
-		ss << std::endl;
-		return ss.str();
+	std::stringstream ss;
+	for (std::vector<Vector2>::iterator it = vertices.begin(); it != vertices.end(); it++) {
+		ss << it->x << "," << it->y << " ";
+	}
+	ss << std::endl;
+	return ss.str();
 }

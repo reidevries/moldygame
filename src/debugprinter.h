@@ -11,7 +11,10 @@
 
 class DebugPrinter {
   public:
+	static const int VERBOSITY = 2;
     static void printDebug(std::string source, std::string debugmsg, int verbosity);
+    static void printDebug(const char* source, const char* debugmsg, int verbosity);
+    static void printDebug(const char* source, uintptr_t ref, const char* debugmsg, int verbosity);
     static void saveDebug(std::string source, std::string debugmsg, std::string filename);
 };
 

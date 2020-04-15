@@ -37,12 +37,12 @@ std::vector<std::unique_ptr<MoldFood>> Level::getAreasOfType(FoodType type) {
 	return getAreasOfTypes(type,type);
 }
 
-void Level::debugRenderFood(float screenscale) {
+void Level::debugRenderFood(float screenscale) { //call between BeginDrawing() and EndDrawing()
 	for (int i = 0; i < food_num; i++) {
 		unsigned char hue = 255*i/food_num;
 		Color c = VectorMath::hsvToRgb(hue, 222, 222, 128);
-		int pnum = food[i].getVectorFan().getPointNum();
-		Vector2* v = food[i].getVectorFan().getArrayScaled(screenscale);
+		int pnum = food[i].getPolygon().getPointNum();
+		Vector2* v = food[i].getPolygon().getArrayScaled(screenscale);
 		DrawTriangleFan(v, pnum, c);
 	}
 }

@@ -2,6 +2,7 @@
 #define MOLDFOOD_H
 
 #include "polygon.h"
+#include <memory>
 
 enum FoodType {Bread=0, Cheese=1};										//these are ordered with more similar foods (by nutrition/source) grouped together
 
@@ -15,7 +16,7 @@ class MoldFood {
 	public:
 		MoldFood(Polygon polygon, FoodType food);
 		MoldFood(std::vector<Vector2> polygon, int pointnum, FoodType food);
-		Polygon getVectorFan() {return polygon;}
+		Polygon getPolygon() {return polygon;}
 		FoodType getFoodType() {return food;}
 		~MoldFood();
 };

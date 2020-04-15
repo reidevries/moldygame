@@ -1,5 +1,6 @@
 #include "vectormath.h"
 #include <cmath>
+#include <cstdint>
 
 Vector2 VectorMath::add(Vector2 a, Vector2 b) {
 	return (Vector2){a.x+b.x, a.y+b.y};
@@ -13,7 +14,7 @@ Vector2 VectorMath::scale(Vector2 a, Vector2 b) {
 	return (Vector2){a.x*b.x, a.y*b.y};
 }
 
-Vector2 VectorMath::scale(Vector2 a, float b) {
+Vector2 VectorMath::scale(Vector2 a, double b) {
 	return (Vector2){a.x*b, a.y*b};
 }
 
@@ -35,7 +36,24 @@ bool VectorMath::checkPointInPolygon(Vector2 point, std::vector<Vector2> polygon
 		}
 	}
 	
-	return (counter%2 == 0);
+	return (counter%2 == 1);
+}
+
+Vector2 VectorMath::normalise(Vector2 a) {
+	float dist2 = std::pow(a.x,2)+std::pow(a.y,2);
+
+	//stolen from quake lol
+	const float x2 = dist2 * 0.5F;
+	const float threehalfs = 1.5F;
+
+	union {
+		float f;
+		std::uint32_t i;
+	} conv = {dist2}; // member 'f' set to value of 'number'.
+	conv.i  = 0x5f3759df - ( conv.i >> 1 );
+	conv.f  *= ( threehalfs - ( x2 * conv.f * conv.f ) );
+
+	return VectorMath::scale(a, conv.f);
 }
 
 Vector2 VectorMath::intersectLines(Vector2 a_1, Vector2 a_2, Vector2 b_1, Vector2 b_2) {
@@ -79,6 +97,27 @@ Vector2 VectorMath::intersectLines(Vector2 a_1, Vector2 a_2, Vector2 b_1, Vector
 			return (Vector2){-1,-1};
 		}
 	}
+}
+
+Vector2 VectorMath::nearestPointOnSegment(Vector2 a_1, Vector2 a_2, Vector2 b) {
+	Vector2 a_dir = VectorMath::normalise(VectorMath::sub(a_2, a_1));
+	Vector2 b_d = VectorMath::sub(b, a_1);
+
+	float d = VectorMath::dot(a_dir, b_d);
+	if (d < 0) d = 0;
+	Vector2 nearest_point = VectorMath::add(a_1, VectorMath::scale(a_dir, d));
+	if (VectorMath::dot(VectorMath::sub(b,a_2), a_dir) > 0) {
+		return a_2; //if the vector from a_2 to b points the same direction as the line, b should be clamped to a_2
+	} else return nearest_point;
+}
+
+float VectorMath::distanceToLine(Vector2 a_1, Vector2 a_2, Vector2 b) {		//don't use this to find distance to a line segment, use dist(nearestPointOnSegment()) instead
+	Vector2 a_d = (Vector2){a_2.x-a_1.x, a_2.y-a_1.y};
+	return abs(a_d.y*b.x - a_d.x*b.y + a_2.x*a_1.y - a_2.y*a_1.x)/std::sqrt(std::pow(a_d.y, 2) + std::pow(a_d.x, 2));
+}
+
+float VectorMath::distanceToSegment(Vector2 a_1, Vector2 a_2, Vector2 b) {
+	return dist(nearestPointOnSegment(a_1,a_2,b), b);
 }
 
 Color VectorMath::hsvToRgb(Color hsv) {

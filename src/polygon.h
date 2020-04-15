@@ -4,6 +4,7 @@
 #include <raylib.h>
 #include <vector>
 #include <string>
+#include <array>
 
 class Polygon {
 	private:
@@ -17,12 +18,12 @@ class Polygon {
 		int getNearestIndex(Vector2 position);					//gets the index of the point closest to the given position
 	public:
 		Polygon();
-		Polygon(std::vector<Vector2> points, int pointnum);
-		Polygon(Vector2 centre, float radius, int pointnum);	//this creates a circle with a resolution of pointnum
+		Polygon(std::vector<Vector2> points, int point_num);
+		Polygon(Vector2 centre, float radius, int point_num);	//this creates a circle with a resolution of pointnum
 		
 		std::vector<Vector2> getVertices() {return vertices;}
 		int getPointNum() {return vertices.size();}
-		Vector2 getCentre() {return centre_pos;}					//gets the "centre"
+		Vector2 getCentre() {return centre_pos;}				//gets the "centre"
 		Vector2 getPointPos(int index);							//gets the position of the point at index
 		void movePoint(int index, Vector2 newpos);				//moves a point to newpos, and updates the centrepos
 		void addPoint(int index, Vector2 newpoint);				//adds a point, and updates the centrepos
@@ -30,7 +31,8 @@ class Polygon {
 		void reverse();											//reverses the entire fan
 		void clear();											//removes all points
 		
-		int getNearestClockwiseIndex(Vector2 position);
+		int getNearestClockwiseIndex(Vector2 pos);
+		std::array<Vector2, 2> getNearestEdge(Vector2 pos);
 		
 		bool containsPoint(Vector2 point);
 		float findVertexCoverage(Polygon b);					//finds the percentage of b's vertices that are inside this vectorfan
